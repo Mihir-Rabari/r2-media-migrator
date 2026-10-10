@@ -1,0 +1,628 @@
+{
+  "generatedAt": "2026-10-10T06:54:51.592Z",
+  "host": {
+    "platform": "win32",
+    "node": "v24.15.0",
+    "cpus": 16,
+    "cpuModel": "AMD Ryzen 7 7730U with Radeon Graphics         ",
+    "totalMemGB": 16.5
+  },
+  "products": 262,
+  "steps": {
+    "config-validate": {
+      "exitCode": 0,
+      "wallMs": 11,
+      "peakRssMB": 280,
+      "result": {
+        "type": "result",
+        "valid": true,
+        "warnings": [
+          "source and destination share bucket \"v2-enterprise\"; objects under \"media/\" are excluded from the source inventory automatically"
+        ]
+      }
+    },
+    "inventory": {
+      "exitCode": 0,
+      "wallMs": 1490,
+      "peakRssMB": 281,
+      "result": {
+        "type": "result",
+        "runId": "run_20261010065856_7dd6b16d",
+        "status": "COMPLETE",
+        "exitCode": 0,
+        "message": "inventory complete"
+      },
+      "summary": {
+        "kind": "inventory",
+        "scope": "full",
+        "assets": 791,
+        "byState": {
+          "PLANNED": 789,
+          "SKIPPED": 1,
+          "SOURCE_MISSING": 1
+        },
+        "totalByState": {
+          "PLANNED": 789,
+          "SKIPPED": 1,
+          "SOURCE_MISSING": 1
+        },
+        "unfinished": 0,
+        "refConflicts": 0,
+        "inventory": {
+          "docsScanned": 280,
+          "refsSeen": 1353,
+          "legacy": 1348,
+          "canonical": 0,
+          "excluded": 0,
+          "invalid": 0,
+          "external": {
+            "images.pexels.com": 2,
+            "ik.imagekit.io": 1,
+            "v2enterprise.in": 1,
+            "images.unsplash.com": 1
+          },
+          "newAssets": 791,
+          "reopened": 0,
+          "byCollection": {
+            "products": 1314,
+            "categories": 8,
+            "sliders": 15,
+            "heroslides": 5,
+            "sitesettings": 6
+          }
+        },
+        "thresholdTripped": null,
+        "tempPeakBytes": 0,
+        "rssBytes": 295227392,
+        "heapUsedBytes": 74620688
+      }
+    },
+    "plan": {
+      "exitCode": 0,
+      "wallMs": 146,
+      "peakRssMB": 282,
+      "result": {
+        "type": "result",
+        "plan": {
+          "assets": 791,
+          "byState": {
+            "PLANNED": 789,
+            "SKIPPED": 1,
+            "SOURCE_MISSING": 1
+          },
+          "referencesToUpdate": 1348,
+          "sourceBytes": 1263755151,
+          "variantsPerAsset": 4,
+          "estimatedObjectsToWrite": 3156,
+          "skipped": {
+            "video-pipeline-not-enabled": 1
+          },
+          "missingSources": 1,
+          "duplicateGroups": 0,
+          "inventory": {
+            "docsScanned": 280,
+            "refsSeen": 1353,
+            "legacy": 1348,
+            "canonical": 0,
+            "excluded": 0,
+            "invalid": 0,
+            "external": {
+              "images.pexels.com": 2,
+              "ik.imagekit.io": 1,
+              "v2enterprise.in": 1,
+              "images.unsplash.com": 1
+            },
+            "newAssets": 0,
+            "reopened": 0,
+            "byCollection": {
+              "products": 1314,
+              "categories": 8,
+              "sliders": 15,
+              "heroslides": 5,
+              "sitesettings": 6
+            }
+          }
+        },
+        "exitCode": 0
+      }
+    },
+    "dry-run-sample-20": {
+      "exitCode": 0,
+      "wallMs": 10116,
+      "peakRssMB": 370,
+      "result": {
+        "type": "result",
+        "runId": "run_20261010065858_5a3fa76e",
+        "status": "DRY_RUN_COMPLETE",
+        "exitCode": 0,
+        "message": "dry run complete: no production mutations were performed"
+      },
+      "summary": {
+        "kind": "dry-run",
+        "scope": "partial",
+        "assets": 0,
+        "byState": {},
+        "totalByState": {
+          "PLANNED": 789,
+          "SKIPPED": 1,
+          "SOURCE_MISSING": 1
+        },
+        "unfinished": 0,
+        "refConflicts": 0,
+        "inventory": {
+          "docsScanned": 280,
+          "refsSeen": 1353,
+          "legacy": 1348,
+          "canonical": 0,
+          "excluded": 0,
+          "invalid": 0,
+          "external": {
+            "images.pexels.com": 2,
+            "ik.imagekit.io": 1,
+            "v2enterprise.in": 1,
+            "images.unsplash.com": 1
+          },
+          "newAssets": 0,
+          "reopened": 0,
+          "byCollection": {
+            "products": 1314,
+            "categories": 8,
+            "sliders": 15,
+            "heroslides": 5,
+            "sitesettings": 6
+          }
+        },
+        "thresholdTripped": null,
+        "tempPeakBytes": 0,
+        "rssBytes": 286437376,
+        "heapUsedBytes": 21882544
+      }
+    },
+    "process-sample-20": {
+      "exitCode": 0,
+      "wallMs": 9732,
+      "peakRssMB": 374,
+      "result": {
+        "type": "result",
+        "runId": "run_20261010065908_cab8b774",
+        "status": "COMPLETE",
+        "exitCode": 0,
+        "message": "process complete (PARTIAL SCOPE: not a full migration)"
+      },
+      "summary": {
+        "kind": "process",
+        "scope": "partial",
+        "assets": 20,
+        "byState": {
+          "DESTINATION_VERIFIED": 20
+        },
+        "totalByState": {
+          "DESTINATION_VERIFIED": 20,
+          "PLANNED": 769,
+          "SKIPPED": 1,
+          "SOURCE_MISSING": 1
+        },
+        "unfinished": 0,
+        "refConflicts": 0,
+        "inventory": {
+          "docsScanned": 280,
+          "refsSeen": 1353,
+          "legacy": 1348,
+          "canonical": 0,
+          "excluded": 0,
+          "invalid": 0,
+          "external": {
+            "images.pexels.com": 2,
+            "ik.imagekit.io": 1,
+            "v2enterprise.in": 1,
+            "images.unsplash.com": 1
+          },
+          "newAssets": 0,
+          "reopened": 0,
+          "byCollection": {
+            "products": 1314,
+            "categories": 8,
+            "sliders": 15,
+            "heroslides": 5,
+            "sitesettings": 6
+          }
+        },
+        "thresholdTripped": null,
+        "tempPeakBytes": 9956524,
+        "rssBytes": 254746624,
+        "heapUsedBytes": 22880432
+      }
+    },
+    "migrate-full": {
+      "exitCode": 4,
+      "wallMs": 350265,
+      "peakRssMB": 413,
+      "result": {
+        "type": "result",
+        "runId": "run_20261010065917_7b864fbf",
+        "status": "INCOMPLETE",
+        "exitCode": 4,
+        "message": "2 asset(s) not finished, 0 reference conflict(s); e.g. image processing failed: Warning treated as error due to failOn setting"
+      },
+      "summary": {
+        "kind": "migrate",
+        "scope": "full",
+        "assets": 791,
+        "byState": {
+          "COMPLETE": 787,
+          "SKIPPED": 2,
+          "FAILED": 1,
+          "SOURCE_MISSING": 1
+        },
+        "totalByState": {
+          "COMPLETE": 787,
+          "FAILED": 1,
+          "SKIPPED": 2,
+          "SOURCE_MISSING": 1
+        },
+        "unfinished": 2,
+        "refConflicts": 0,
+        "inventory": {
+          "docsScanned": 280,
+          "refsSeen": 1353,
+          "legacy": 1348,
+          "canonical": 0,
+          "excluded": 0,
+          "invalid": 0,
+          "external": {
+            "images.pexels.com": 2,
+            "ik.imagekit.io": 1,
+            "v2enterprise.in": 1,
+            "images.unsplash.com": 1
+          },
+          "newAssets": 0,
+          "reopened": 0,
+          "byCollection": {
+            "products": 1314,
+            "categories": 8,
+            "sliders": 15,
+            "heroslides": 5,
+            "sitesettings": 6
+          }
+        },
+        "thresholdTripped": null,
+        "tempPeakBytes": 14751153,
+        "rssBytes": 333041664,
+        "heapUsedBytes": 27380216
+      }
+    },
+    "verify": {
+      "exitCode": 5,
+      "wallMs": 9426,
+      "peakRssMB": 258,
+      "result": {
+        "type": "result",
+        "ok": false,
+        "exitCode": 5,
+        "assetsChecked": 787,
+        "incomplete": 2,
+        "violations": [],
+        "warnings": [
+          "asset a3ehm5kwxh5vgysd3qiqbr2rn (products/broken.jpg) is FAILED, not COMPLETE",
+          "asset ahtb4cijwh4jdvdx7rxiquzzg (products/missing.jpg) is SOURCE_MISSING, not COMPLETE",
+          "2 legacy reference(s) remain in approved fields (not migrated, failed or conflicting): migration is not complete"
+        ],
+        "canonicalReferencesChecked": 1343,
+        "unknownCanonical": 0,
+        "legacyRemaining": 2
+      }
+    },
+    "migrate-rerun-idempotent": {
+      "exitCode": 4,
+      "wallMs": 89,
+      "peakRssMB": 258,
+      "result": {
+        "type": "result",
+        "runId": "run_20261010070517_39b075a3",
+        "status": "INCOMPLETE",
+        "exitCode": 4,
+        "message": "2 asset(s) not finished, 0 reference conflict(s); e.g. image processing failed: Warning treated as error due to failOn setting"
+      },
+      "summary": {
+        "kind": "migrate",
+        "scope": "full",
+        "assets": 791,
+        "byState": {
+          "COMPLETE": 787,
+          "SKIPPED": 2,
+          "FAILED": 1,
+          "SOURCE_MISSING": 1
+        },
+        "totalByState": {
+          "COMPLETE": 787,
+          "FAILED": 1,
+          "SKIPPED": 2,
+          "SOURCE_MISSING": 1
+        },
+        "unfinished": 2,
+        "refConflicts": 0,
+        "inventory": {
+          "docsScanned": 280,
+          "refsSeen": 1353,
+          "legacy": 5,
+          "canonical": 1343,
+          "excluded": 0,
+          "invalid": 0,
+          "external": {
+            "images.pexels.com": 2,
+            "ik.imagekit.io": 1,
+            "v2enterprise.in": 1,
+            "images.unsplash.com": 1
+          },
+          "newAssets": 0,
+          "reopened": 0,
+          "byCollection": {
+            "products": 3,
+            "heroslides": 1,
+            "sitesettings": 1
+          }
+        },
+        "thresholdTripped": null,
+        "tempPeakBytes": 0,
+        "rssBytes": 270299136,
+        "heapUsedBytes": 39008136
+      }
+    },
+    "export-mapping": {
+      "exitCode": 0,
+      "wallMs": 40,
+      "peakRssMB": 258,
+      "result": {
+        "type": "result",
+        "file": "C:\\Users\\mihir\\AppData\\Local\\Temp\\mm-sim-76zt61\\journal\\mapping.jsonl",
+        "entries": 787
+      }
+    },
+    "reconcile": {
+      "exitCode": 0,
+      "wallMs": 3210,
+      "peakRssMB": 259,
+      "result": {
+        "type": "result",
+        "runId": "run_20261010070518_c9e23d5c",
+        "issues": [],
+        "orphans": 0,
+        "checkedAssets": 791,
+        "checkedRefs": 1348,
+        "ok": true,
+        "exitCode": 0
+      }
+    },
+    "report": {
+      "exitCode": 0,
+      "wallMs": 164,
+      "peakRssMB": 259,
+      "result": {
+        "type": "result",
+        "runId": "run_20261010070518_c9e23d5c",
+        "dir": "C:\\Users\\mihir\\AppData\\Local\\Temp\\mm-sim-76zt61\\journal\\reports\\run_20261010070518_c9e23d5c",
+        "files": [
+          "C:\\Users\\mihir\\AppData\\Local\\Temp\\mm-sim-76zt61\\journal\\reports\\run_20261010070518_c9e23d5c\\report.json",
+          "C:\\Users\\mihir\\AppData\\Local\\Temp\\mm-sim-76zt61\\journal\\reports\\run_20261010070518_c9e23d5c\\report.md",
+          "C:\\Users\\mihir\\AppData\\Local\\Temp\\mm-sim-76zt61\\journal\\reports\\run_20261010070518_c9e23d5c\\assets.jsonl",
+          "C:\\Users\\mihir\\AppData\\Local\\Temp\\mm-sim-76zt61\\journal\\reports\\run_20261010070518_c9e23d5c\\errors.jsonl",
+          "C:\\Users\\mihir\\AppData\\Local\\Temp\\mm-sim-76zt61\\journal\\reports\\run_20261010070518_c9e23d5c\\mapping.jsonl"
+        ],
+        "review": {
+          "png": null,
+          "html": "C:\\Users\\mihir\\AppData\\Local\\Temp\\mm-sim-76zt61\\journal\\reports\\run_20261010070518_c9e23d5c\\review.html",
+          "count": 0
+        }
+      }
+    },
+    "rollback": {
+      "exitCode": 0,
+      "wallMs": 5589,
+      "peakRssMB": 260,
+      "result": {
+        "type": "result",
+        "runId": "run_20261010070521_4f6bbe3b",
+        "exitCode": 0,
+        "planned": 1343,
+        "rolledBack": 1343,
+        "alreadyOriginal": 0,
+        "conflicts": [],
+        "failed": 0,
+        "assetsRolledBack": 787
+      }
+    },
+    "migrate-after-rollback": {
+      "exitCode": 4,
+      "wallMs": 24168,
+      "peakRssMB": 264,
+      "result": {
+        "type": "result",
+        "runId": "run_20261010070527_23eec22d",
+        "status": "INCOMPLETE",
+        "exitCode": 4,
+        "message": "2 asset(s) not finished, 0 reference conflict(s); e.g. image processing failed: Warning treated as error due to failOn setting"
+      },
+      "summary": {
+        "kind": "migrate",
+        "scope": "full",
+        "assets": 791,
+        "byState": {
+          "COMPLETE": 787,
+          "SKIPPED": 2,
+          "FAILED": 1,
+          "SOURCE_MISSING": 1
+        },
+        "totalByState": {
+          "COMPLETE": 787,
+          "FAILED": 1,
+          "SKIPPED": 2,
+          "SOURCE_MISSING": 1
+        },
+        "unfinished": 2,
+        "refConflicts": 0,
+        "inventory": {
+          "docsScanned": 280,
+          "refsSeen": 1353,
+          "legacy": 1348,
+          "canonical": 0,
+          "excluded": 0,
+          "invalid": 0,
+          "external": {
+            "images.pexels.com": 2,
+            "ik.imagekit.io": 1,
+            "v2enterprise.in": 1,
+            "images.unsplash.com": 1
+          },
+          "newAssets": 0,
+          "reopened": 787,
+          "byCollection": {
+            "products": 1314,
+            "categories": 8,
+            "sliders": 15,
+            "heroslides": 5,
+            "sitesettings": 6
+          }
+        },
+        "thresholdTripped": null,
+        "tempPeakBytes": 0,
+        "rssBytes": 272375808,
+        "heapUsedBytes": 25961336
+      }
+    },
+    "verify-after-remigrate": {
+      "exitCode": 5,
+      "wallMs": 7800,
+      "peakRssMB": 263,
+      "result": {
+        "type": "result",
+        "ok": false,
+        "exitCode": 5,
+        "assetsChecked": 787,
+        "incomplete": 2,
+        "violations": [],
+        "warnings": [
+          "asset a3ehm5kwxh5vgysd3qiqbr2rn (products/broken.jpg) is FAILED, not COMPLETE",
+          "asset ahtb4cijwh4jdvdx7rxiquzzg (products/missing.jpg) is SOURCE_MISSING, not COMPLETE",
+          "2 legacy reference(s) remain in approved fields (not migrated, failed or conflicting): migration is not complete"
+        ],
+        "canonicalReferencesChecked": 1343,
+        "unknownCanonical": 0,
+        "legacyRemaining": 2
+      }
+    }
+  },
+  "dataset": {
+    "distinctImages": 943,
+    "totalSourceBytes": 1524345144,
+    "avgSourceKB": 1579,
+    "generationMs": 244745
+  },
+  "dryRunNoMutation": {
+    "databaseUnchanged": true,
+    "storageUnchanged": true
+  },
+  "rerunNoChange": {
+    "databaseUnchanged": true,
+    "storageUnchanged": true
+  },
+  "rollbackExact": {
+    "databaseEqualsOriginal": true
+  },
+  "migrateRun": {
+    "runId": "run_20261010065917_7b864fbf",
+    "timings": {
+      "database": {
+        "count": 787,
+        "avgMs": 5,
+        "maxMs": 29.6,
+        "totalSec": 3.95
+      },
+      "download": {
+        "count": 769,
+        "avgMs": 11.4,
+        "maxMs": 68.8,
+        "totalSec": 8.77
+      },
+      "process": {
+        "count": 3068,
+        "avgMs": 427,
+        "maxMs": 1066.4,
+        "totalSec": 1310.09
+      },
+      "stage:cache": {
+        "count": 787,
+        "avgMs": 1,
+        "maxMs": 6.8,
+        "totalSec": 0.79
+      },
+      "stage:process": {
+        "count": 769,
+        "avgMs": 1774.9,
+        "maxMs": 2303.6,
+        "totalSec": 1364.91
+      },
+      "stage:references": {
+        "count": 787,
+        "avgMs": 6.2,
+        "maxMs": 31.3,
+        "totalSec": 4.84
+      },
+      "stage:verify": {
+        "count": 767,
+        "avgMs": 20.7,
+        "maxMs": 112.7,
+        "totalSec": 15.9
+      },
+      "upload": {
+        "count": 3068,
+        "avgMs": 6.8,
+        "maxMs": 72.3,
+        "totalSec": 20.8
+      },
+      "verify": {
+        "count": 767,
+        "avgMs": 20,
+        "maxMs": 111.7,
+        "totalSec": 15.35
+      }
+    },
+    "counters": {
+      "bytesRead": 2450002342,
+      "bytesWritten": 1219979482,
+      "dbUpdates": 1343,
+      "retries": 0,
+      "purgesRequested": 0
+    }
+  },
+  "finalAssetStates": {
+    "COMPLETE": 787,
+    "SKIPPED": 2,
+    "FAILED": 1,
+    "SOURCE_MISSING": 1
+  },
+  "sizes": {
+    "sourceBytesOfMigratedAssets": 1263138681,
+    "allVariantBytes": 1253053126,
+    "perWidthAvgKB": {
+      "400": 107.9,
+      "800": 298.4,
+      "1200": 493.9,
+      "1600": 654.7
+    },
+    "perWidthPctOfSourceAvg": {
+      "400": 6.9,
+      "800": 19,
+      "1200": 31.5,
+      "1600": 41.8
+    },
+    "totalStoreAfter": {
+      "objects": 4095,
+      "bytes": 2777598282
+    }
+  },
+  "duplicateGroups": 1,
+  "journalIntegrity": {
+    "ok": true,
+    "messages": []
+  }
+}

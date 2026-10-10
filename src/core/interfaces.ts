@@ -184,6 +184,8 @@ export interface MigrationJournal {
   updateRun(runId: string, patch: Partial<Omit<RunRecord, 'runId'>>): void;
   requestStop(runId: string): void;
   appendEvent(e: EventInput): number;
+  /** Aggregate counters computed in SQL (progress must not scan whole tables on every tick). */
+  countTransitionsTo(runId: string, states: readonly string[]): number;
   events(runId: string | null, opts?: { limit?: number; level?: EventRecord['level']; afterId?: number; assetId?: string }): EventRecord[];
   addCounters(runId: string, delta: Partial<Counters>): void;
   counters(runId: string): Counters;
@@ -241,6 +243,8 @@ export interface AssetManifestRepository {
   recordCacheOp(op: { assetId: string; runId: string; url: string; action: 'cdn-verify' | 'purge'; status: CacheOpStatus; detail?: string }): void;
   listCacheOps(runId?: string): Array<{ assetId: string; runId: string; url: string; action: string; status: string; detail: string | null; ts: string }>;
   duplicateGroups(): Array<{ sha256: string; assetIds: string[] }>;
+  countRefsByStatus(): Record<string, number>;
+  countAssetsByCacheStatus(): Record<string, number>;
 }
 
 export interface CheckpointStore {

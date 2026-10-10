@@ -51,10 +51,8 @@ export function computeProgress(journal: JournalStore, run: RunRecord, now: Date
   const phaseCp = journal.latest(run.runId, 'phase');
   const phase = (phaseCp?.data.phase as string) ?? 'unknown';
   const invDone = !['unknown', 'starting', 'inventory'].includes(phase);
-  const refs: Record<string, number> = {};
-  for (const r of journal.listRefs({})) refs[r.status] = (refs[r.status] ?? 0) + 1;
-  const cache: Record<string, number> = {};
-  for (const a of journal.listAssets()) cache[a.cacheStatus] = (cache[a.cacheStatus] ?? 0) + 1;
+  const refs = journal.countRefsByStatus();
+  const cache = journal.countAssetsByCacheStatus();
 
   const start = Date.parse(run.startedAt);
   const end = run.finishedAt ? Date.parse(run.finishedAt) : now.getTime();
@@ -63,7 +61,7 @@ export function computeProgress(journal: JournalStore, run: RunRecord, now: Date
   const finishStates: AssetState[] = run.kind === 'process' ? ['DESTINATION_VERIFIED', 'REFERENCES_UPDATED', 'CACHE_HANDLED', 'COMPLETE'] : ['COMPLETE'];
   const done = n(...finishStates) + n('SKIPPED');
   const settled = done + n('FAILED', 'CONFLICT', 'SOURCE_MISSING', 'ROLLED_BACK');
-  const completedThisRun = journal.events(run.runId, { limit: 100000 }).filter((e) => e.type === 'asset.transition' && finishStates.includes(e.detail.to as AssetState)).length;
+  const completedThisRun = journal.countTransitionsTo(run.runId, finishStates);
   const totalKnown = invDone && total > 0;
   const remaining = total - settled;
   let etaSec: number | null = null;

@@ -28,7 +28,12 @@ export class ShutdownController {
 /** Install SIGINT/SIGTERM handlers. Returns an uninstall function. */
 export function installSignalHandlers(ctrl: ShutdownController, signals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM']): () => void {
   const handlers = signals.map((sig) => {
-    const h = () => ctrl.request(sig);
+    const h = () => {
+      // A second signal means "stop NOW". That is safe: state is journaled at every step and recovery observes reality,
+      // so an abrupt exit is just another crash the next run can resume from.
+      if (ctrl.requested) process.exit(3);
+      ctrl.request(sig);
+    };
     process.on(sig, h);
     return [sig, h] as const;
   });

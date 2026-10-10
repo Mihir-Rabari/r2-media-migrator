@@ -221,6 +221,23 @@ export class SqliteJournal implements JournalStore {
       .all(...p, limit) as Row[];
     return rows.reverse().map((r) => ({ id: r.id, ts: r.ts, runId: r.run_id, assetId: r.asset_id, level: r.level, type: r.type, detail: JSON.parse(r.detail) }));
   }
+  countTransitionsTo(runId: string, states: readonly string[]): number {
+    if (!states.length) return 0;
+    const r = this.db
+      .prepare(`SELECT COUNT(*) AS n FROM events WHERE run_id=? AND type='asset.transition' AND json_extract(detail,'$.to') IN (${states.map(() => '?').join(',')})`)
+      .get(runId, ...states) as Row;
+    return r.n as number;
+  }
+  countRefsByStatus(): Record<string, number> {
+    const out: Record<string, number> = {};
+    for (const r of this.all('SELECT status, COUNT(*) AS n FROM refs GROUP BY status')) out[r.status] = r.n;
+    return out;
+  }
+  countAssetsByCacheStatus(): Record<string, number> {
+    const out: Record<string, number> = {};
+    for (const r of this.all('SELECT cache_status AS s, COUNT(*) AS n FROM assets GROUP BY cache_status')) out[r.s] = r.n;
+    return out;
+  }
   addCounters(runId: string, d: Partial<Counters>): void {
     this.run('INSERT OR IGNORE INTO counters(run_id) VALUES(?)', runId);
     this.run(
