@@ -3,7 +3,7 @@ import { validationError } from '../domain/errors';
 
 export const COMMANDS = [
   'init', 'config', 'inventory', 'plan', 'dry-run', 'process', 'migrate', 'verify', 'reconcile', 'status', 'logs', 'retry', 'resume',
-  'rollback', 'report', 'stop', 'readiness', 'export-mapping', 'help', 'version',
+  'rollback', 'report', 'stop', 'readiness', 'export-mapping', 'discover', 'help', 'version',
 ] as const;
 export type Command = (typeof COMMANDS)[number];
 
@@ -162,6 +162,7 @@ COMMANDS
   report                   Write report.json / report.md / assets.jsonl / mapping.jsonl (+ review artifacts)
   readiness                Show the production-readiness checklist (attest with --attest ...)
   export-mapping           Write the verified legacy->canonical mapping used by the URL resolver
+  discover                 Sample documents and SUGGEST media fields missing from the field map (read-only)
 
 OPTIONS
   -c, --config <file>      Configuration file (.json/.js/.cjs/.mjs/.ts)

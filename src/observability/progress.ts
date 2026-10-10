@@ -59,9 +59,11 @@ export function computeProgress(journal: JournalStore, run: RunRecord, now: Date
   const start = Date.parse(run.startedAt);
   const end = run.finishedAt ? Date.parse(run.finishedAt) : now.getTime();
   const elapsedSec = Math.max(0, (end - start) / 1000);
-  const done = n('COMPLETE') + n('SKIPPED');
+  // what "finished" means depends on the run: `process` stops at the verified stage, `migrate` at COMPLETE
+  const finishStates: AssetState[] = run.kind === 'process' ? ['DESTINATION_VERIFIED', 'REFERENCES_UPDATED', 'CACHE_HANDLED', 'COMPLETE'] : ['COMPLETE'];
+  const done = n(...finishStates) + n('SKIPPED');
   const settled = done + n('FAILED', 'CONFLICT', 'SOURCE_MISSING', 'ROLLED_BACK');
-  const completedThisRun = journal.events(run.runId, { limit: 100000 }).filter((e) => e.type === 'asset.transition' && (e.detail.to === 'COMPLETE' || e.detail.to === 'DESTINATION_VERIFIED')).length;
+  const completedThisRun = journal.events(run.runId, { limit: 100000 }).filter((e) => e.type === 'asset.transition' && finishStates.includes(e.detail.to as AssetState)).length;
   const totalKnown = invDone && total > 0;
   const remaining = total - settled;
   let etaSec: number | null = null;

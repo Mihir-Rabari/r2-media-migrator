@@ -22,6 +22,7 @@ import { SqliteJournal } from '../journal/sqliteJournal';
 import { globalRedactor } from '../security/redact';
 import type { RunKindForEngine } from '../migration/context';
 import { os_hostname } from '../migration/util';
+import { discoverMediaFields } from '../inventory/discover';
 
 export interface Io {
   out: NodeJS.WritableStream;
@@ -238,6 +239,7 @@ export async function execute(p: Parsed, io: Io): Promise<number> {
     case 'stop':
     case 'report':
     case 'export-mapping':
+    case 'discover':
     case 'readiness':
     case 'verify':
     case 'reconcile':
@@ -316,6 +318,13 @@ async function journalCommands(p: Parsed, io: Io, out: Out): Promise<number> {
         if (run.dryRun) review = await buildReviewArtifacts(path.join(dir, 'samples'), dir, j, run.runId).catch(() => null);
         const rep = buildReport(j, run.runId);
         out.result({ runId: run.runId, dir, files, review, report: rep }, `${reportMarkdown(rep)}\nreport written to ${dir}`);
+        return ExitCode.OK;
+      }
+
+      case 'discover': {
+        const found = await discoverMediaFields(rt.deps.db, rt.deps.resolver, l.config.database.collections, p.limit ?? 200);
+        const missing = found.filter((f) => !f.alreadyConfigured);
+        out.result({ fields: found, unmapped: missing.length }, [`media-like fields found by sampling (${found.length}); NOT in the field map: ${missing.length}`, ...found.map((f) => `  ${f.alreadyConfigured ? 'mapped  ' : 'UNMAPPED'} ${f.collection}.${f.pattern}  samples=${f.samples} legacy=${f.legacyHostHits} external=${f.externalHits}  e.g. ${f.example}`)].join(String.fromCharCode(10)));
         return ExitCode.OK;
       }
 
