@@ -38,6 +38,12 @@ test('migration: first run migrates every legacy reference, leaves external URLs
     // cache headers on immutable objects
     assert.equal(w.storage.objects.get(variantKeys[0])!.head.cacheControl, 'public, max-age=31536000, immutable');
 
+    // every object records its deterministic idempotency key, asset id and checksum
+    const meta = w.storage.objects.get(variantKeys[0])!.head.metadata;
+    assert.match(meta['idempotency-key'], /^[0-9a-f]{32}$/);
+    assert.match(meta['sha256'], /^[0-9a-f]{64}$/);
+    assert.match(meta['asset-id'], /^a[a-z2-7]{24}$/);
+
     await assertInvariants(w);
   } finally {
     w.cleanup();
