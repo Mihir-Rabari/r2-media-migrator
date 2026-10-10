@@ -89,7 +89,7 @@ export interface CasItem extends Pick<RefLocation, 'collection' | 'docId'> {
 }
 export type CasResult =
   | { ok: true }
-  | { ok: false; reason: 'conflict' | 'missing'; actual?: Record<string, unknown> };
+  | { ok: false; reason: 'conflict' | 'missing' | 'aborted'; actual?: Record<string, unknown> };
 
 export interface DbCapabilities {
   transactions: boolean;
