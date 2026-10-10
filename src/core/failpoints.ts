@@ -40,6 +40,8 @@ export type FailpointName = (typeof FAILPOINT_NAMES)[number];
 
 export class Failpoints {
   private arms = new Map<string, FailArm & { hits: number; fired: number }>();
+  private hooks = new Map<string, Array<(hit: number) => void | Promise<void>>>();
+  private counts = new Map<string, number>();
   readonly history: string[] = [];
 
   arm(name: string, arm: FailArm): this {
@@ -48,9 +50,19 @@ export class Failpoints {
   }
   disarmAll(): void {
     this.arms.clear();
+    this.hooks.clear();
+  }
+  /** Run a callback every time a failpoint is reached (deterministic concurrent-edit simulation). */
+  on(name: string, fn: (hit: number) => void | Promise<void>): this {
+    this.hooks.set(name, [...(this.hooks.get(name) ?? []), fn]);
+    return this;
+  }
+  /** How many times each failpoint was reached. */
+  hitCount(name: string): number {
+    return this.counts.get(name) ?? 0;
   }
   get armed(): boolean {
-    return this.arms.size > 0;
+    return this.arms.size > 0 || this.hooks.size > 0;
   }
 
   /** Parse `name[=mode][@after]` comma list. */
@@ -67,6 +79,9 @@ export class Failpoints {
   }
 
   async hit(name: string): Promise<void> {
+    const n = (this.counts.get(name) ?? 0) + 1;
+    this.counts.set(name, n);
+    for (const h of this.hooks.get(name) ?? []) await h(n);
     const a = this.arms.get(name);
     if (!a) return;
     a.hits++;

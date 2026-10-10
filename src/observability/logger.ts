@@ -32,16 +32,19 @@ export class Logger {
   }
 
   log(level: Level, type: string, detail: Record<string, unknown> = {}, ctx: LogContext = {}): void {
-    if (!this.enabled(level)) return;
+    // The durable journal always keeps everything >= info (audit trail); the level only filters file/stderr sinks.
+    const toJournal = ORDER[level] >= ORDER.info || this.enabled(level);
+    if (!this.enabled(level) && !(toJournal && this.opts.journal)) return;
     const safe = globalRedactor.deep(detail);
     const ts = new Date().toISOString();
-    if (this.opts.journal && ctx.runId !== undefined) {
+    if (toJournal && this.opts.journal && ctx.runId !== undefined) {
       try {
         this.opts.journal.appendEvent({ runId: ctx.runId ?? null, assetId: ctx.assetId ?? null, level, type, detail: safe, ts });
       } catch {
         /* the journal being unavailable must not mask the original problem */
       }
     }
+    if (!this.enabled(level)) return;
     const line = JSON.stringify({ ts, level, type, runId: ctx.runId ?? null, assetId: ctx.assetId ?? null, ...safe });
     if (this.fileFd !== null) fs.writeSync(this.fileFd, line + '\n');
     if (this.opts.stderr && !this.opts.quiet && (ORDER[level] >= ORDER.warn || this.opts.verbose)) {

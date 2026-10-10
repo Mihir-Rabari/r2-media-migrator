@@ -101,6 +101,11 @@ export class MigrationEngine {
     if (opts.concurrency !== undefined && (opts.concurrency < 1 || !Number.isInteger(opts.concurrency))) throw validationError('BAD_CONCURRENCY', 'concurrency must be a positive integer');
     if (opts.limit !== undefined && (opts.limit < 1 || !Number.isInteger(opts.limit))) throw validationError('BAD_LIMIT', 'limit must be a positive integer');
 
+    if (cfg.database.writePolicy.mode === 'transaction' && !d.dryRun && kind === 'migrate') {
+      const caps = await d.db.capabilities();
+      if (!caps.transactions) throw validationError('TRANSACTIONS_UNSUPPORTED', `database.writePolicy.mode=transaction but the database does not support transactions: ${caps.reason}`);
+    }
+
     // ---- run record
     let run: RunRecord | null = opts.runId ? journal.getRun(opts.runId) : null;
     if (opts.resume) {
@@ -585,19 +590,28 @@ export class MigrationEngine {
     const t0 = performance.now();
     const variants = journal.listVariants(a.assetId);
     if (variants.length !== this.profiles().length) return { kind: 'reprocess', message: `expected ${this.profiles().length} variants, journal has ${variants.length}` };
+    /** Verification failed for this object: distrust it, and remove it ONLY if this tool wrote it for this asset. */
+    const distrust = async (v: (typeof variants)[number], why: string, existing: { metadata: Record<string, string> } | null): Promise<StageResult> => {
+      journal.upsertVariant({ ...v, verified: false });
+      if (existing && existing.metadata['asset-id'] === a.assetId) {
+        await dest.delete(v.key);
+        this.d.logger.warn('verify.removed-corrupt-object', { key: v.key, why }, { runId: this.runId, assetId: a.assetId });
+      }
+      return { kind: 'reprocess', message: why };
+    };
     for (const v of variants) {
       const h = await dest.head(v.key);
       if (!h) return { kind: 'reprocess', message: `destination object missing after upload: ${v.key}` };
-      if (h.size !== v.bytes) return { kind: 'reprocess', message: `size mismatch for ${v.key}: ${h.size} != ${v.bytes}` };
-      if (h.metadata.sha256 !== v.sha256) return { kind: 'reprocess', message: `checksum metadata mismatch for ${v.key}` };
-      if (h.contentType && h.contentType !== `image/${v.format}`) return { kind: 'reprocess', message: `content-type mismatch for ${v.key}: ${h.contentType}` };
+      if (h.size !== v.bytes) return distrust(v, `size mismatch for ${v.key}: ${h.size} != ${v.bytes}`, h);
+      if (h.metadata.sha256 !== v.sha256) return distrust(v, `checksum metadata mismatch for ${v.key}`, h);
+      if (h.contentType && h.contentType !== `image/${v.format}`) return distrust(v, `content-type mismatch for ${v.key}: ${h.contentType}`, h);
       if (cfg.migration.verification.mode === 'full') {
         const got = await dest.get(v.key);
         const hash = createHash('sha256');
         let n = 0;
         for await (const c of got.body) { hash.update(c as Buffer); n += (c as Buffer).length; }
         journal.addCounters(this.runId, { bytesRead: n });
-        if (n !== v.bytes || hash.digest('hex') !== v.sha256) return { kind: 'reprocess', message: `content hash mismatch when re-reading ${v.key}` };
+        if (n !== v.bytes || hash.digest('hex') !== v.sha256) return distrust(v, `content hash mismatch when re-reading ${v.key}`, h);
       }
     }
     journal.tx(() => variants.forEach((v) => journal.upsertVariant({ ...v, verified: true })));

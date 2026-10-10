@@ -74,7 +74,7 @@ export function makeWorld(cfgOver: Record<string, any> = {}): World {
   const journalFile = path.join(dir, 'journal', 'journal.sqlite');
   const storage = new MemoryStorage('bkt', NEW_BASE);
   const db = new SqliteDocDatabase(':memory:');
-  const cache = new FakeCache([LEGACY_HOST, 'cdn.new.test', 'x.r2.dev']);
+  const cache = new FakeCache([LEGACY_HOST, '*.r2.dev', 'cdn.new.test']);
   const world: World = {
     dir, cfg, journalFile, storage, db, cache, failpoints: new Failpoints(), reporter: new CollectingReporter(),
     journal: new SqliteJournal(journalFile),
@@ -91,7 +91,7 @@ export function makeWorld(cfgOver: Record<string, any> = {}): World {
         cfg, processingFingerprint: fingerprint({ w: cfg.processing.widths, q: cfg.processing.quality }), configFingerprint: fingerprint(cfg),
         paths: { tempDir: path.join(dir, 'tmp'), journalDir: path.join(dir, 'journal'), reportDir: path.join(dir, 'reports') },
         journal: world.journal, source: storage, dest: storage, db, processor: new SharpProcessor({ threads: 1 }), cache, cdn: null, resolver,
-        logger: new Logger({ level: 'error', stderr: false }), reporter: world.reporter, failpoints: world.failpoints, shutdown: world.shutdown,
+        logger: new Logger({ level: 'error', stderr: false, journal: world.journal }), reporter: world.reporter, failpoints: world.failpoints, shutdown: world.shutdown,
         dryRun: false, mutationAuthorized: true, pid: world.nextPid++, host: 'testhost', isPidAlive: () => false, sleep: async () => undefined, rand: () => 0.5,
         timerMs: 0,
         ...o,
