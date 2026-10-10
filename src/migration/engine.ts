@@ -130,9 +130,14 @@ export class MigrationEngine {
     // ---- exclusive lock (throws kind=locked when another live process owns the journal)
     const host = d.host ?? os.hostname();
     const pid = d.pid ?? process.pid;
-    this.lock = journal.acquireLock(this.runId, {
-      staleAfterMs: cfg.migration.lockStaleSec * 1000, pid, host, isPidAlive: d.isPidAlive ?? defaultPidAlive,
-    });
+    try {
+      this.lock = journal.acquireLock(this.runId, {
+        staleAfterMs: cfg.migration.lockStaleSec * 1000, pid, host, isPidAlive: d.isPidAlive ?? defaultPidAlive,
+      });
+    } catch (e) {
+      if (!opts.resume) journal.updateRun(this.runId, { status: 'FAILED', finishedAt: new Date().toISOString(), blockingError: globalRedactor.string(errorMessage(e)) });
+      throw e;
+    }
     // we are the only live process: any claim left behind belongs to a dead one
     journal.clearClaims();
     cleanStaleTemp(d.paths.tempDir, 0);
