@@ -11,12 +11,21 @@ export class MutationLedger {
     this.blocked.push(op);
     throw new DryRunViolation(op);
   }
+  /** Promise-returning APIs must reject, not throw synchronously. */
+  reject(op: string): Promise<never> {
+    try {
+      this.record(op);
+    } catch (e) {
+      return Promise.reject(e);
+    }
+    return Promise.reject(new Error('unreachable'));
+  }
 }
 
 export function readOnlyStorage(inner: StorageProvider, ledger = new MutationLedger()): StorageProvider {
   return new Proxy(inner, {
     get(target, prop, receiver) {
-      if (prop === 'put' || prop === 'delete') return () => ledger.record(`storage.${String(prop)}`);
+      if (prop === 'put' || prop === 'delete') return () => ledger.reject(`storage.${String(prop)}`);
       const v = Reflect.get(target, prop, receiver);
       return typeof v === 'function' ? v.bind(target) : v;
     },
@@ -26,7 +35,7 @@ export function readOnlyStorage(inner: StorageProvider, ledger = new MutationLed
 export function readOnlyDatabase(inner: DatabaseProvider, ledger = new MutationLedger()): DatabaseProvider {
   return new Proxy(inner, {
     get(target, prop, receiver) {
-      if (prop === 'compareAndSet') return () => ledger.record('database.compareAndSet');
+      if (prop === 'compareAndSet') return () => ledger.reject('database.compareAndSet');
       const v = Reflect.get(target, prop, receiver);
       return typeof v === 'function' ? v.bind(target) : v;
     },
@@ -36,7 +45,7 @@ export function readOnlyDatabase(inner: DatabaseProvider, ledger = new MutationL
 export function readOnlyCache(inner: CacheInvalidationProvider, ledger = new MutationLedger()): CacheInvalidationProvider {
   return new Proxy(inner, {
     get(target, prop, receiver) {
-      if (prop === 'purge') return () => ledger.record('cache.purge');
+      if (prop === 'purge') return () => ledger.reject('cache.purge');
       const v = Reflect.get(target, prop, receiver);
       return typeof v === 'function' ? v.bind(target) : v;
     },

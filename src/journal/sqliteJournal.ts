@@ -353,7 +353,7 @@ export class SqliteJournal implements JournalStore {
       const p = o.patch ?? {};
       const col: Record<string, string> = {
         sourceSha256: 'source_sha256', sourceBytes: 'source_bytes', sourceMime: 'source_mime', sourceWidth: 'source_width', sourceHeight: 'source_height',
-        skipReason: 'skip_reason', cacheStatus: 'cache_status', cdnVerified: 'cdn_verified', processingVersion: 'processing_version', mediaType: 'media_type',
+        skipReason: 'skip_reason', cacheStatus: 'cache_status', cdnVerified: 'cdn_verified', processingVersion: 'processing_version', mediaType: 'media_type', lastError: 'last_error',
       };
       const sets = ['state=?', 'updated_at=?', 'last_error=?', 'run_id=?'];
       const vals: any[] = [to, this.now(), o.error ?? null, o.runId ?? row.run_id];
@@ -368,6 +368,19 @@ export class SqliteJournal implements JournalStore {
         detail: { from, to, ...(o.error ? { error: o.error } : {}), ...(o.detail ?? {}) },
       });
       return this.toAsset(this.get('SELECT * FROM assets WHERE asset_id=?', assetId)!);
+    });
+  }
+  patchAsset(assetId: string, patch: NonNullable<TransitionOptions['patch']>, runId: string | null): void {
+    const col: Record<string, string> = {
+      sourceSha256: 'source_sha256', sourceBytes: 'source_bytes', sourceMime: 'source_mime', sourceWidth: 'source_width', sourceHeight: 'source_height',
+      skipReason: 'skip_reason', cacheStatus: 'cache_status', cdnVerified: 'cdn_verified', processingVersion: 'processing_version', mediaType: 'media_type', lastError: 'last_error',
+    };
+    const sets: string[] = ['updated_at=?'];
+    const vals: any[] = [this.now()];
+    for (const [k, v] of Object.entries(patch)) if (col[k]) { sets.push(`${col[k]}=?`); vals.push(typeof v === 'boolean' ? (v ? 1 : 0) : v ?? null); }
+    this.tx(() => {
+      this.db.prepare(`UPDATE assets SET ${sets.join(',')} WHERE asset_id=?`).run(...vals, assetId);
+      this.appendEvent({ runId, assetId, level: 'debug', type: 'asset.patched', detail: patch as Record<string, unknown> });
     });
   }
   recordFailure(assetId: string, runId: string, error: string): number {

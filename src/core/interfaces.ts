@@ -207,7 +207,7 @@ export interface TransitionOptions {
   runId: string | null;
   error?: string | null;
   patch?: Partial<Pick<AssetRecord,
-    'sourceSha256' | 'sourceBytes' | 'sourceMime' | 'sourceWidth' | 'sourceHeight' | 'skipReason' | 'cacheStatus' | 'cdnVerified' | 'processingVersion' | 'mediaType'>>;
+    'sourceSha256' | 'sourceBytes' | 'sourceMime' | 'sourceWidth' | 'sourceHeight' | 'skipReason' | 'cacheStatus' | 'cdnVerified' | 'processingVersion' | 'mediaType' | 'lastError'>>;
   detail?: Record<string, unknown>;
   incrementAttempts?: boolean;
   resetAttempts?: boolean;
@@ -220,6 +220,8 @@ export interface AssetManifestRepository {
   listAssets(q?: AssetQuery): AssetRecord[];
   countByState(): Record<string, number>;
   transition(assetId: string, to: AssetState, opts: TransitionOptions): AssetRecord;
+  /** Update descriptive fields without changing state (audited). */
+  patchAsset(assetId: string, patch: NonNullable<TransitionOptions['patch']>, runId: string | null): void;
   /** Record a failed attempt without changing state; returns new attempt count. */
   recordFailure(assetId: string, runId: string, error: string): number;
   /** Atomically claim the next asset in one of `states`. Safe across processes. */
@@ -249,6 +251,9 @@ export interface CheckpointStore {
 
 /** Everything the SQLite journal provides. */
 export interface JournalStore extends MigrationJournal, AssetManifestRepository, CheckpointStore {
+  /** Run `fn` inside one atomic journal transaction (synchronous work only). */
+  tx<T>(fn: () => T): T;
+  backupTo(dest: string): void;
   close(): void;
 }
 
