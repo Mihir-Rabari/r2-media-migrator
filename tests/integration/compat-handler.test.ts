@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as http from 'node:http';
 import { AddressInfo } from 'node:net';
+import { Readable } from 'node:stream';
 import { createLegacyMediaHandler, parseRange } from '../../src/compatibility/handler';
 import { MediaUrlResolver, MappingEntry } from '../../src/compatibility/resolver';
 import { MemoryStorage } from '../../src/storage/memoryStorage';
@@ -189,6 +190,14 @@ test('compat stream: large objects are streamed with backpressure, not buffered 
   const storage = new MemoryStorage('bkt');
   const big = Buffer.alloc(64 * 1024 * 1024, 7);
   storage.seed(`media/v1/${id}/1200.webp`, big, 'image/webp');
+  // emulate a network-backed store: data arrives in 64 KB chunks, never as one 64 MB buffer
+  const realGet = storage.get.bind(storage);
+  storage.get = (async (k: string, o?: any) => {
+    const g = await realGet(k, o);
+    const data = storage.objects.get(k)!.data;
+    async function* chunks() { for (let i = 0; i < data.length; i += 65536) yield data.subarray(i, i + 65536); }
+    return { ...g, body: Readable.from(chunks()) };
+  }) as never;
   const h = createLegacyMediaHandler({ resolver: new MediaUrlResolver(opts, mapping), routePrefixes: ['/legacy'], mode: 'stream', storage });
   const server = http.createServer((req, res) => void h(req, res));
   await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));

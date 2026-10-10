@@ -1,0 +1,119 @@
+{
+  "version": 1,
+  "environment": "staging",
+
+  "source": {
+    "storage": {
+      "provider": "s3",
+      "bucket": "v2-enterprise",
+      "endpoint": "https://ACCOUNT_ID.r2.cloudflarestorage.com",
+      "region": "auto",
+      "accessKeyIdEnv": "R2_ACCESS_KEY_ID",
+      "secretAccessKeyEnv": "R2_SECRET_ACCESS_KEY"
+    },
+    "legacyHosts": ["cdn.v2enterprise.in", "pub-replaceme.r2.dev"],
+    "excludePrefixes": []
+  },
+
+  "database": {
+    "provider": "mongodb",
+    "uriEnv": "MONGODB_URI",
+    "collections": [
+      { "name": "products", "fields": ["photo", "photos[]", "hoverImage"], "timestampField": "updatedAt" },
+      { "name": "categories", "fields": ["image"], "timestampField": "updatedAt" },
+      { "name": "sliders", "fields": ["image", "laptopUrl", "tabletUrl", "mobileUrl"] },
+      { "name": "heroslides", "fields": ["url", "poster", "laptopUrl", "tabletUrl", "mobileUrl"] },
+      { "name": "contents", "fields": ["image"], "timestampField": "updatedAt" },
+      { "name": "journalposts", "fields": ["image"] },
+      {
+        "name": "sitesettings",
+        "fields": [
+          "logoImage",
+          "aboutContent.heroImage",
+          "aboutContent.visionImage",
+          "aboutContent.footerImage",
+          "homeSections.categories[].image",
+          "homeSections.promotionalSliders[].image",
+          "homeSections.promotionalBanner.image",
+          "homeSections.newStandard.image"
+        ],
+        "timestampField": "updatedAt"
+      }
+    ],
+    "writePolicy": { "mode": "single-doc-cas", "referenceUpdates": "enabled" }
+  },
+
+  "destination": {
+    "storage": {
+      "provider": "s3",
+      "bucket": "v2-enterprise",
+      "endpoint": "https://ACCOUNT_ID.r2.cloudflarestorage.com",
+      "region": "auto",
+      "accessKeyIdEnv": "R2_ACCESS_KEY_ID",
+      "secretAccessKeyEnv": "R2_SECRET_ACCESS_KEY"
+    },
+    "publicBaseUrl": "https://cdn.v2enterprise.in",
+    "namespace": "media",
+    "namespaceVersion": "v1",
+    "referenceVariantWidth": 1600,
+    "urlStrategy": "variant-path",
+    "cacheControl": "public, max-age=31536000, immutable"
+  },
+
+  "processing": {
+    "widths": [400, 800, 1200, 1600],
+    "format": "webp",
+    "quality": 80,
+    "effort": 4,
+    "metadata": "strip",
+    "allowedInputFormats": ["jpeg", "png", "webp"],
+    "animated": "skip",
+    "strictDecode": true,
+    "maxSourceBytes": 20971520,
+    "maxSourcePixels": 100000000,
+    "tempDir": ".media-migrate/tmp",
+    "tempBudgetBytes": 536870912,
+    "concurrency": 4,
+    "threadsPerJob": 1
+  },
+
+  "migration": {
+    "journalDir": ".media-migrate",
+    "checkpointIntervalSec": 15,
+    "journalBackups": 3,
+    "batchSize": 200,
+    "failureThreshold": { "maxFailed": 50, "maxFailedRatio": 0.1 },
+    "retry": { "maxAttempts": 4, "baseDelayMs": 500, "maxDelayMs": 15000, "jitter": 0.25, "maxItemAttempts": 5 },
+    "timeoutsMs": { "download": 120000, "upload": 120000, "database": 30000 },
+    "verification": { "mode": "full" },
+    "originals": { "retention": "keep" },
+    "lockStaleSec": 120,
+    "rateLimitPerSec": 0,
+    "shutdownGraceSec": 30
+  },
+
+  "cache": {
+    "provider": "none",
+    "purgeLegacyUrls": false,
+    "verifyCdn": false,
+    "onFailure": "fail"
+  },
+
+  "observability": {
+    "logLevel": "info",
+    "reportDir": ".media-migrate/reports",
+    "summaryIntervalSec": 10
+  },
+
+  "safety": {
+    "allowProductionMutations": false,
+    "neverRewriteHosts": ["images.pexels.com", "images.unsplash.com", "ik.imagekit.io", "v2-fashion.s3.amazonaws.com"]
+  },
+
+  "compatibility": {
+    "routePrefixes": [],
+    "mode": "redirect",
+    "redirectStatus": 308,
+    "mappingFile": ".media-migrate/mapping.jsonl"
+  }
+}

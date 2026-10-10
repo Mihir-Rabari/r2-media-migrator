@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "environment": "staging",
+  "source": {
+    "storage": {
+      "provider": "s3",
+      "bucket": "my-bucket",
+      "endpoint": "https://ACCOUNT_ID.r2.cloudflarestorage.com",
+      "region": "auto",
+      "forcePathStyle": false,
+      "accessKeyIdEnv": "R2_ACCESS_KEY_ID",
+      "secretAccessKeyEnv": "R2_SECRET_ACCESS_KEY"
+    },
+    "legacyHosts": ["cdn.example.com", "pub-0123abcd.r2.dev"],
+    "allowHttp": false,
+    "includePrefixes": ["products/", "sliders/", "categories/"],
+    "excludePrefixes": ["products/private/"]
+  },
+  "database": {
+    "provider": "mongodb",
+    "uriEnv": "MONGODB_URI",
+    "database": "app",
+    "collections": [
+      { "name": "products", "fields": ["photo", "photos[]", "hoverImage", "variants[].image"], "timestampField": "updatedAt" },
+      { "name": "pages", "fields": ["blocks[].image", "seo.ogImage"] }
+    ],
+    "writePolicy": { "mode": "single-doc-cas", "batchSize": 50, "referenceUpdates": "enabled" }
+  },
+  "destination": {
+    "storage": {
+      "provider": "s3",
+      "bucket": "my-bucket",
+      "endpoint": "https://ACCOUNT_ID.r2.cloudflarestorage.com",
+      "region": "auto",
+      "accessKeyIdEnv": "R2_ACCESS_KEY_ID",
+      "secretAccessKeyEnv": "R2_SECRET_ACCESS_KEY"
+    },
+    "publicBaseUrl": "https://cdn.example.com",
+    "namespace": "media",
+    "namespaceVersion": "v1",
+    "referenceVariantWidth": 1200,
+    "urlStrategy": "variant-path",
+    "cacheControl": "public, max-age=31536000, immutable"
+  },
+  "processing": {
+    "widths": [400, 800, 1200],
+    "format": "webp",
+    "quality": 78,
+    "effort": 4,
+    "metadata": "strip",
+    "allowedInputFormats": ["jpeg", "png", "webp", "gif"],
+    "animated": "skip",
+    "strictDecode": true,
+    "maxSourceBytes": 52428800,
+    "maxSourcePixels": 100000000,
+    "video": { "mode": "skip" },
+    "tempDir": ".media-migrate/tmp",
+    "tempBudgetBytes": 536870912,
+    "concurrency": 4,
+    "threadsPerJob": 1
+  },
+  "migration": {
+    "journalDir": ".media-migrate",
+    "checkpointIntervalSec": 15,
+    "journalBackups": 3,
+    "batchSize": 200,
+    "failureThreshold": { "maxFailed": 50, "maxFailedRatio": 0.1 },
+    "retry": { "maxAttempts": 4, "baseDelayMs": 500, "maxDelayMs": 15000, "jitter": 0.25, "maxItemAttempts": 5 },
+    "timeoutsMs": { "download": 120000, "upload": 120000, "database": 30000 },
+    "verification": { "mode": "full" },
+    "originals": { "retention": "keep" },
+    "lockStaleSec": 120,
+    "rateLimitPerSec": 0,
+    "shutdownGraceSec": 30
+  },
+  "cache": {
+    "provider": "cloudflare",
+    "zoneIdEnv": "CF_ZONE_ID",
+    "apiTokenEnv": "CF_API_TOKEN",
+    "purgeLegacyUrls": true,
+    "verifyCdn": true,
+    "onFailure": "fail"
+  },
+  "observability": {
+    "logLevel": "info",
+    "logFile": ".media-migrate/logs/media-migrate.log",
+    "reportDir": ".media-migrate/reports",
+    "summaryIntervalSec": 10
+  },
+  "safety": {
+    "allowProductionMutations": false,
+    "neverRewriteHosts": ["images.pexels.com"]
+  },
+  "compatibility": {
+    "routePrefixes": ["/legacy-media"],
+    "mode": "redirect",
+    "redirectStatus": 308,
+    "mappingFile": ".media-migrate/mapping.jsonl"
+  }
+}

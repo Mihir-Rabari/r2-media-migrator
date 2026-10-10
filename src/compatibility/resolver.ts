@@ -30,7 +30,7 @@ export interface MappingEntry {
   assetId: string;
   sourceKey: string;
   /** Widths that actually exist and are verified, with real pixel widths. */
-  variants: Array<{ width: number; effectiveWidth: number; format: string }>;
+  variants: Array<{ width: number; effectiveWidth: number; format: string; /** object key in the destination bucket */ key?: string }>;
   state: string;
 }
 

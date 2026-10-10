@@ -29,7 +29,8 @@ export interface MongoLike {
 
 export interface MongoOptions {
   uri?: string;
-  database: string;
+  /** Optional: when omitted the database named in the connection string is used. */
+  database?: string;
   client?: MongoLike;
   serverSelectionTimeoutMs?: number;
 }
@@ -51,7 +52,7 @@ export class MongoDatabase implements DatabaseProvider {
       await (this.client as unknown as MongoClient).connect();
       this.connected = true;
     }
-    return this.client.db(this.o.database);
+    return this.client.db(this.o.database as string);
   }
 
   async capabilities(): Promise<DbCapabilities> {

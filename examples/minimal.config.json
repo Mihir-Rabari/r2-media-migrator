@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "source": {
+    "storage": { "provider": "fs", "root": "./local-bucket" },
+    "legacyHosts": ["cdn.example.com"]
+  },
+  "database": {
+    "provider": "sqlite-docs",
+    "file": "./local-db.sqlite",
+    "collections": [{ "name": "products", "fields": ["photo", "photos[]"] }]
+  },
+  "destination": {
+    "storage": { "provider": "fs", "root": "./local-bucket" },
+    "publicBaseUrl": "https://cdn.example.com",
+    "referenceVariantWidth": 1200
+  }
+}

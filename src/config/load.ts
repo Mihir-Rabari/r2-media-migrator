@@ -255,7 +255,7 @@ export function semanticValidation(cfg: MediaMigrateConfig, warnings: string[]):
       if (f === '_id' || f.startsWith('_id.')) err(`collection "${c.name}": _id can never be a media field`);
     }
   }
-  if (cfg.database.provider === 'mongodb' && (!cfg.database.uriEnv || !cfg.database.database)) err('database.provider=mongodb requires database.uriEnv and database.database');
+  if (cfg.database.provider === 'mongodb' && !cfg.database.uriEnv) err('database.provider=mongodb requires database.uriEnv (the NAME of the env var holding the connection string; database.database is optional when the URI names a database)');
   if (cfg.database.provider === 'sqlite-docs' && !cfg.database.file) err('database.provider=sqlite-docs requires database.file');
   if (cfg.database.writePolicy.mode === 'transaction') warnings.push('database.writePolicy.mode=transaction requires a replica set / mongos; this is verified at run time and the run is refused otherwise');
 
@@ -267,6 +267,12 @@ export function semanticValidation(cfg: MediaMigrateConfig, warnings: string[]):
       if (p.startsWith(nsPrefix) || nsPrefix.startsWith(p)) err(`source.includePrefixes entry "${p}" overlaps the destination namespace "${cfg.destination.namespace}/" in the same bucket`);
     }
     if (cfg.source.includePrefixes.length === 0) warnings.push(`source and destination share bucket "${cfg.source.storage.bucket}"; objects under "${nsPrefix}" are excluded from the source inventory automatically`);
+  }
+  const PUBLIC_SUFFIXES = ['r2.dev', 'amazonaws.com', 's3.amazonaws.com', 'cloudfront.net', 'github.io', 'pages.dev', 'workers.dev', 'vercel.app', 'netlify.app', 'azurewebsites.net', 'blob.core.windows.net', 'googleusercontent.com'];
+  for (const h of cfg.source.legacyHosts) {
+    if (h.startsWith('*.') && PUBLIC_SUFFIXES.includes(h.slice(2).toLowerCase())) {
+      warnings.push(`source.legacyHosts "${h}" matches EVERY host under a shared public suffix (including other people's buckets): pin the exact host (e.g. pub-xxxx.r2.dev) instead`);
+    }
   }
   for (const h of cfg.safety.neverRewriteHosts) if (cfg.source.legacyHosts.includes(h)) err(`host "${h}" is both a legacy host and in safety.neverRewriteHosts`);
   if (cfg.source.legacyHosts.some((h) => h === '*' || h.startsWith('*.') && h.split('.').length < 3)) err('source.legacyHosts must not contain overly broad wildcards');

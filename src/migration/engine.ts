@@ -850,6 +850,7 @@ export class MigrationEngine {
     const summary: Record<string, unknown> = {
       kind, scope: this.partialScope ? 'partial' : 'full', assets: scope.length, byState: counts, totalByState: byState, unfinished: unfinished.length,
       refConflicts, inventory: this.stats, thresholdTripped: this.thresholdTripped,
+      tempPeakBytes: this.budget.peak, rssBytes: process.memoryUsage().rss, heapUsedBytes: process.memoryUsage().heapUsed,
     };
 
     let status: RunResult['status'];

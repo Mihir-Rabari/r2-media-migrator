@@ -49,7 +49,7 @@ const sameStorage = (a: StorageConfig, b: StorageConfig): boolean => JSON.string
 
 export function buildDatabase(l: LoadedConfig): DatabaseProvider {
   const d = l.config.database;
-  if (d.provider === 'mongodb') return new MongoDatabase({ uri: l.secrets.mongoUri!, database: d.database! });
+  if (d.provider === 'mongodb') return new MongoDatabase({ uri: l.secrets.mongoUri!, database: d.database });
   return new SqliteDocDatabase(resolvePath(l, d.file!));
 }
 

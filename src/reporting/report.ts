@@ -95,7 +95,7 @@ export function exportMapping(journal: JournalStore): MappingEntry[] {
   for (const a of journal.listAssets({ states: ['DESTINATION_VERIFIED', 'REFERENCES_UPDATED', 'CACHE_HANDLED', 'COMPLETE'] })) {
     const vs = journal.listVariants(a.assetId);
     if (vs.length === 0 || vs.some((v) => !v.verified)) continue;
-    out.push({ assetId: a.assetId, sourceKey: a.sourceKey, state: a.state, variants: vs.map((v) => ({ width: v.width, effectiveWidth: v.effectiveWidth, format: v.format })) });
+    out.push({ assetId: a.assetId, sourceKey: a.sourceKey, state: a.state, variants: vs.map((v) => ({ width: v.width, effectiveWidth: v.effectiveWidth, format: v.format, key: v.key })) });
   }
   return out;
 }
