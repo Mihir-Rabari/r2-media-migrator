@@ -4,7 +4,7 @@ Everything below was **executed in this session on one machine**; nothing is est
 listed as NOT RUN with the reason. Statuses: PASS / FAIL / BLOCKED / NOT RUN.
 
 * Host: Windows 11, AMD Ryzen 7 7730U (16 threads), 16.5 GB RAM, Node v24.15.0, sharp 0.35.5 (libvips 8.18.7)
-* Tool commit under test: `25b1076` (+ documentation-only commits)
+* Tool commit under test: `ecfef69` (final full run: 270 tests, 268 pass, 0 fail, 2 skipped, 108.5 s; per-suite rows below were measured one commit earlier; the source delta since then is one SQLite index, a timeout wrapper on database reads, and a benchmark script)
 * Raw outputs: simulation → [`data/simulation-results.json`](data/simulation-results.json)
 
 ## 1. Automated test suites (`npm test`, then each directory individually)
@@ -18,7 +18,7 @@ listed as NOT RUN with the reason. Statuses: PASS / FAIL / BLOCKED / NOT RUN.
 | `tests/concurrency` (bounds, barrier, byte budget, locks, shutdown, retry storm, poison pill, stress, memory) | 14 | 14 | 0 | 0 | 7.6 s | PASS |
 | `tests/security` | 11 | 11 | 0 | 0 | 1.8 s | PASS |
 | `tests/e2e` (compiled CLI as subprocess) | 15 | 14 | 0 | 1 | 37.6 s | PASS (1 skipped = POSIX SIGINT/SIGTERM on a Windows host, **NOT RUN**) |
-| **Total** (`npm test`, serial) | **270** | **268** | **0** | **2** | **111.7 s** | **PASS** |
+| **Total** (`npm test`, serial; final run at the commit above) | **270** | **268** | **0** | **2** | **108.5 s** | **PASS** |
 
 The first full run (before the final hardening) had **1 failure** — the 64 MB streaming test for the HTTP handler measured
 RSS growth of 68.9 MB because the *test's own in-memory store* emitted the object as a single 64 MB chunk. The test fixture
