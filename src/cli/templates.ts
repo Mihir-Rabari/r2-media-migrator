@@ -6,7 +6,7 @@ export const MINIMAL_CONFIG = `{
     "storage": {
       "provider": "s3",
       "bucket": "my-bucket",
-      "endpoint": "https://<ACCOUNT_ID>.r2.cloudflarestorage.com",
+      "endpoint": "https://ACCOUNT_ID.r2.cloudflarestorage.com",
       "accessKeyIdEnv": "R2_ACCESS_KEY_ID",
       "secretAccessKeyEnv": "R2_SECRET_ACCESS_KEY"
     },
@@ -24,7 +24,7 @@ export const MINIMAL_CONFIG = `{
     "storage": {
       "provider": "s3",
       "bucket": "my-bucket",
-      "endpoint": "https://<ACCOUNT_ID>.r2.cloudflarestorage.com",
+      "endpoint": "https://ACCOUNT_ID.r2.cloudflarestorage.com",
       "accessKeyIdEnv": "R2_ACCESS_KEY_ID",
       "secretAccessKeyEnv": "R2_SECRET_ACCESS_KEY"
     },

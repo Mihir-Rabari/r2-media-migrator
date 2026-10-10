@@ -140,7 +140,7 @@ export async function execute(p: Parsed, io: Io): Promise<number> {
       const target = path.resolve(p.out ?? 'media-migrate.config.json');
       if (fs.existsSync(target) && !p.yes) throw safetyError('EXISTS', `${target} already exists; pass --yes to overwrite`);
       fs.writeFileSync(target, MINIMAL_CONFIG);
-      out.result({ written: target }, `wrote ${target}\nEdit it, export the referenced secrets as environment variables, then run: media-migrate config validate --config ${path.basename(target)}`);
+      out.result({ written: target }, `wrote ${target}\nReplace ACCOUNT_ID and the other placeholders, export the referenced secrets as environment variables, then run: media-migrate config validate --config ${path.basename(target)}`);
       return ExitCode.OK;
     }
 

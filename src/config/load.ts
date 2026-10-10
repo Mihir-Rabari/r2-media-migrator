@@ -191,8 +191,24 @@ export async function loadConfig(opts: LoadOptions): Promise<LoadedConfig> {
   });
   return {
     config: cfg, baseDir, secrets, warnings, migratedFrom: applied, processingFingerprint,
-    configFingerprint: fingerprint({ ...cfg, observability: undefined }),
+    configFingerprint: semanticFingerprint(cfg),
   };
+}
+
+/**
+ * Fingerprint of everything that changes WHAT a run produces. Operational knobs (concurrency, batch size, temp dir,
+ * timeouts, logging, journal location) are excluded, so a run can be resumed with different tuning but never with a
+ * different field map, destination layout or transformation profile.
+ */
+export function semanticFingerprint(cfg: MediaMigrateConfig): string {
+  const { processing: pr, migration: mg, ...rest } = cfg;
+  const { concurrency: _c, threadsPerJob: _t, tempDir: _d, tempBudgetBytes: _b, ...proc } = pr;
+  void _c; void _t; void _d; void _b;
+  return fingerprint({
+    ...rest, observability: undefined, processing: proc,
+    migration: { originals: mg.originals, verification: mg.verification },
+    database: { ...rest.database, writePolicy: { referenceUpdates: rest.database.writePolicy.referenceUpdates } },
+  });
 }
 
 // ───────── semantic validation ─────────

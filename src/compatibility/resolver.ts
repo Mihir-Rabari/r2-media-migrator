@@ -117,6 +117,14 @@ export class MediaUrlResolver {
     return { kind: 'canonical', assetId: m[1], width: Number(m[2]), url: this.canonicalUrl(m[1], Number(m[2])) };
   }
 
+  /** Object key of a variant in the destination bucket. */
+  variantObjectKey(assetId: string, width: number = this.o.referenceVariantWidth): string {
+    return `${this.o.namespace}/${this.o.namespaceVersion}/${assetId}/${width}.${this.o.format}`;
+  }
+  get referenceWidth(): number {
+    return this.o.referenceVariantWidth;
+  }
+
   /**
    * Resolve any media URL to its canonical form.
    *  - canonical -> itself (idempotent)

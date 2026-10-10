@@ -9,7 +9,7 @@ import { MediaMigrateError, SimulatedCrash } from '../domain/errors';
  *  - error: throw a transient MediaMigrateError (a provider hiccup; retry budget applies)
  *  - exit : process.exit(86) immediately, no cleanup (CLI end-to-end tests)
  */
-export type FailMode = 'crash' | 'error' | 'exit';
+export type FailMode = 'crash' | 'error' | 'exit' | 'sleep';
 
 export interface FailArm {
   mode: FailMode;
@@ -17,6 +17,8 @@ export interface FailArm {
   after?: number;
   /** Fire at most this many times (default 1). */
   times?: number;
+  /** For mode=sleep: pause this long (lets end-to-end tests hold a lock or a run open deterministically). */
+  ms?: number;
 }
 
 export const EXIT_CODE_FAILPOINT = 86;
@@ -71,9 +73,9 @@ export class Failpoints {
     const raw = env.MEDIA_MIGRATE_FAILPOINTS;
     if (!raw || env.MEDIA_MIGRATE_ENABLE_FAILPOINTS !== '1') return fp;
     for (const part of raw.split(',').map((s) => s.trim()).filter(Boolean)) {
-      const m = /^([^=@]+)(?:=(crash|error|exit))?(?:@(\d+))?$/.exec(part);
+      const m = /^([^=@]+)(?:=(crash|error|exit|sleep)(?::(\d+))?)?(?:@(\d+))?$/.exec(part);
       if (!m) continue;
-      fp.arm(m[1], { mode: (m[2] as FailMode) ?? 'crash', after: m[3] ? Number(m[3]) : 0 });
+      fp.arm(m[1], { mode: (m[2] as FailMode) ?? 'crash', ms: m[3] ? Number(m[3]) : undefined, after: m[4] ? Number(m[4]) : 0 });
     }
     return fp;
   }
@@ -90,6 +92,10 @@ export class Failpoints {
     a.fired++;
     this.history.push(name);
     if (a.mode === 'exit') process.exit(EXIT_CODE_FAILPOINT);
+    if (a.mode === 'sleep') {
+      await new Promise((r) => setTimeout(r, a.ms ?? 1000));
+      return;
+    }
     if (a.mode === 'error') throw new MediaMigrateError('transient', 'FAILPOINT', `injected transient failure at ${name}`);
     throw new SimulatedCrash(name);
   }
