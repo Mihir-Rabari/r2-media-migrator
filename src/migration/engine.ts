@@ -12,7 +12,7 @@ import {
 import { newRunId, profileName, variantKey, VariantProfile } from '../domain/ids';
 import { NO_FAILPOINTS } from '../core/failpoints';
 import { readOnlyCache, readOnlyDatabase, readOnlyStorage } from '../core/guards';
-import { ByteBudget, RateLimiter } from '../core/limits';
+import { ByteBudget, RateLimiter, Semaphore } from '../core/limits';
 import { RetryPolicy, withRetry } from '../core/retry';
 import { ShutdownController } from '../core/shutdown';
 import { cleanStaleTemp, makeTempDir } from '../security/paths';
@@ -796,8 +796,9 @@ export class MigrationEngine {
     fs.mkdirSync(dir, { recursive: true });
     const planned = journal.listAssets({ states: ['PLANNED'], limit });
     let predictedBytes = 0;
-    for (const a of planned) {
-      if (this.stopping()) break;
+    const sem = new Semaphore(Math.max(1, Math.min(cfg.processing.concurrency, 8)));
+    await Promise.all(planned.map((a) => sem.run(async () => {
+      if (this.stopping()) return;
       const tmp = makeTempDir(this.d.paths.tempDir);
       try {
         const got = await source.get(a.sourceKey);
@@ -831,7 +832,7 @@ export class MigrationEngine {
       } finally {
         fs.rmSync(tmp, { recursive: true, force: true });
       }
-    }
+    })));
     journal.save(this.runId, 'dryrun:summary', { sampled: planned.length, predictedVariantBytes: predictedBytes, samplesDir: dir });
   }
 
