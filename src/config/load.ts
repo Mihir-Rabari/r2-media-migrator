@@ -120,7 +120,9 @@ export async function readConfigFile(file: string): Promise<Raw> {
     }
   }
   if (['.js', '.cjs', '.mjs', '.ts', '.mts', '.cts'].includes(ext)) {
-    const mod = await import(pathToFileURL(abs).href);
+    // TS compiles `import()` to require() under module=commonjs; go through Function to keep a native dynamic import
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
+    const mod = await (new Function('u', 'return import(u)') as (u: string) => Promise<{ default?: unknown }>)(pathToFileURL(abs).href);
     return structuredClone(mod.default ?? mod);
   }
   throw validationError('CONFIG_FORMAT', `unsupported config extension "${ext}" (use .json, .js, .cjs, .mjs or .ts)`);

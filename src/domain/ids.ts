@@ -24,7 +24,8 @@ function base32(buf: Uint8Array): string {
  * bytes are verified separately). Lowercase base32, safe in URLs and object keys.
  */
 export function assetIdFor(provider: string, bucket: string, normalizedKey: string): string {
-  const digest = createHash('sha256').update(`${provider}\u0000${bucket}\u0000${normalizedKey}`).digest();
+  // length-prefixed fields: the encoding is injective, so no (provider,bucket,key) triple can alias another
+  const digest = createHash('sha256').update(`${provider.length}:${provider}|${bucket.length}:${bucket}|${normalizedKey}`).digest();
   return 'a' + base32(digest).slice(0, 24);
 }
 

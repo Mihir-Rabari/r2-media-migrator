@@ -95,7 +95,8 @@ export function parseAllowedUrl(input: string, policy: HostPolicy): ParsedMediaU
       return null;
     }
   }
-  const key = decoded.replace(/^\/+/, '');
+  // exactly one separator is stripped: "//x" is ambiguous between proxies/CDNs, so it fails key validation instead
+  const key = decoded.startsWith('/') ? decoded.slice(1) : decoded;
   if (!isValidObjectKey(key)) return null;
   return { host, key, search: u.search, hash: u.hash };
 }

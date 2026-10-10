@@ -12,7 +12,7 @@ const PATTERNS: Array<[RegExp, string]> = [
   [/(mongodb(?:\+srv)?|postgres(?:ql)?|mysql|redis|amqp|https?):\/\/([^\s:@/]+):([^\s@/]+)@/gi, '$1://$2:' + REDACTED + '@'],
   [/\b(AKIA|ASIA)[A-Z0-9]{16}\b/g, REDACTED],
   [/\b(Bearer|Basic)\s+[A-Za-z0-9._~+/=-]{8,}/gi, '$1 ' + REDACTED],
-  [/((?:secret|password|passwd|token|api[_-]?key)["']?\s*[:=]\s*["']?)([^\s"',;}]{4,})/gi, '$1' + REDACTED],
+  [/((?:secret|password|passwd|token|api[_-]?key|access[_-]?key|private[_-]?key)\w*["']?\s*[:=]\s*["']?)([^\s"',;}]{4,})/gi, '$1' + REDACTED],
 ];
 
 export class Redactor {

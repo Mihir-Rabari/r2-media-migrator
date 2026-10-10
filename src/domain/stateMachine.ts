@@ -21,7 +21,8 @@ export const ASSET_TRANSITIONS: Readonly<Record<AssetState, readonly AssetState[
   SOURCE_MISSING: ['PLANNED'],
   CONFLICT: ['PLANNED', 'ROLLED_BACK', 'RECONCILE_REQUIRED'],
   ROLLED_BACK: ['PLANNED'],
-  RECONCILE_REQUIRED: ['PLANNED', 'DESTINATION_VERIFIED', 'REFERENCES_UPDATED', 'COMPLETE', 'ROLLED_BACK', 'FAILED'],
+  // reconcile may re-queue an asset or return it to the verified stage, but can never claim later stages without re-running them
+  RECONCILE_REQUIRED: ['PLANNED', 'DESTINATION_VERIFIED', 'ROLLED_BACK', 'FAILED'],
 };
 
 export const TERMINAL_OK_STATES: ReadonlySet<AssetState> = new Set(['COMPLETE']);

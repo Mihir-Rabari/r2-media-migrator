@@ -78,7 +78,7 @@ export function createLegacyMediaHandler(o: LegacyHandlerOptions) {
       if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, 'method not allowed', { Allow: 'GET, HEAD' });
 
       // path -> key: percent-decode ONCE; refuse encoded separators / double encoding / traversal
-      const rest = rawPath.slice(prefix.length).replace(/^\/+/, '');
+      const rest = rawPath.slice(prefix.length).replace(/^\//, '');
       if (!rest || /%2f|%5c|%00|%2e%2e/i.test(rest)) return send(res, 400, 'bad request');
       let decoded: string;
       try {
