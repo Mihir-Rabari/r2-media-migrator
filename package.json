@@ -4,10 +4,20 @@
   "description": "Resumable, verifiable media optimization and reference-migration CLI for S3-compatible storage (Cloudflare R2) and MongoDB",
   "license": "MIT",
   "type": "commonjs",
-  "engines": { "node": ">=22.13" },
-  "bin": { "media-migrate": "dist/cli/main.js" },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "bin": {
+    "media-migrate": "dist/cli/main.js"
+  },
   "main": "dist/index.js",
-  "files": ["dist", "examples", "docs", "reports/media-migration", "README.md"],
+  "files": [
+    "dist",
+    "examples",
+    "docs",
+    "reports/media-migration",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
@@ -27,7 +37,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.700.0",
     "mongodb": "^6.10.0",
-    "sharp": "^0.34.0",
+    "sharp": "^0.35.5",
     "zod": "^3.23.8"
   },
   "devDependencies": {
