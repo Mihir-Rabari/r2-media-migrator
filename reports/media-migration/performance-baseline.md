@@ -74,3 +74,20 @@ numbers must be measured in Phase 0 of the migration plan; the V2 investigation 
 
 Real R2 latency/throughput, MongoDB update latency, AVIF encode cost, CPU on the production host, multi-run variance, memory
 under 5,000+ asset journals (SQLite journal size for this run is small; no scale test beyond 791 assets).
+
+## Journal scalability micro-benchmark (20,000 assets, one reference each)
+
+`node dist-test/tests/perf/journal-bench.js --n 20000` → [`data/journal-bench.json`](data/journal-bench.json). SQLite WAL,
+`synchronous=FULL`, same host.
+
+| Operation | Measured |
+|---|---|
+| insert 20,000 assets + 20,000 references (one transaction) | 748 ms |
+| 20,000 state transitions in one transaction | 1,028 ms |
+| `claimNext` (atomic claim across connections), 2,000 calls | 0.79 ms per call |
+| individual transition transactions (each fsynced), 2,000 | 0.80 ms each |
+| `computeProgress` snapshot at 20,000 assets | 20.6 ms |
+| journal file size | 14.6 MB |
+
+Takeaway: journal overhead is negligible next to image transformation (≈1.8 s of worker time per asset in the simulation);
+progress reporting can run every few seconds without scanning event history.

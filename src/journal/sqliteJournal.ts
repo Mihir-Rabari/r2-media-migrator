@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS assets(
   cache_status TEXT NOT NULL DEFAULT 'PENDING', cdn_verified INTEGER NOT NULL DEFAULT 0, processing_version TEXT,
   claimed_by TEXT, lease_until INTEGER, created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
 CREATE INDEX IF NOT EXISTS assets_state ON assets(state);
+CREATE INDEX IF NOT EXISTS assets_state_id ON assets(state, asset_id);
 CREATE INDEX IF NOT EXISTS assets_sha ON assets(source_sha256);
 CREATE TABLE IF NOT EXISTS variants(
   asset_id TEXT NOT NULL, profile TEXT NOT NULL, width INTEGER NOT NULL, effective_width INTEGER NOT NULL, height INTEGER NOT NULL,

@@ -1,0 +1,12 @@
+{
+  "n": 20000,
+  "node": "v24.15.0",
+  "platform": "win32",
+  "insertAssetsAndRefsMs": 747.8835,
+  "planAllMs": 1027.6115,
+  "claimNext2000Ms": 1575.3871000000001,
+  "claimNextPerCallMsAtN": 0.7876935500000001,
+  "transitionOneByOne2000Ms": 1601.7603,
+  "computeProgressMs": 20.558399999999892,
+  "fileSizeMB": 14.6
+}

@@ -644,7 +644,7 @@ export class MigrationEngine {
     type Plan = { ref: RefRecord; action: 'write' | 'adopt' | 'conflict' | 'missing' };
     const plans: Plan[] = [];
     for (const r of refs) {
-      const cur = await db.readValues(r.collection, r.docId, [r.path]);
+      const cur = await this.dbTimed(() => db.readValues(r.collection, r.docId, [r.path]));
       if (!cur) { plans.push({ ref: r, action: 'missing' }); continue; }
       const v = cur[r.path];
       if (v === newValue) plans.push({ ref: r, action: 'adopt' });
