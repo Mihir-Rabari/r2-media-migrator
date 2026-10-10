@@ -1,6 +1,8 @@
 import * as fs from 'node:fs';
 import { createHash } from 'node:crypto';
 import sharp from 'sharp';
+type SharpMetadata = Awaited<ReturnType<ReturnType<typeof sharp>['metadata']>>;
+type SharpOutputInfo = Awaited<ReturnType<ReturnType<typeof sharp>['toFile']>>;
 import type { GeneratedVariant, MediaProcessor, ProbeResult, ProcessLimits, VariantSpec } from '../core/interfaces';
 import { MediaMigrateError } from '../domain/errors';
 import { sniff } from './mime';
@@ -53,7 +55,7 @@ export class SharpProcessor implements MediaProcessor {
     if (!sn || sn.mediaType !== 'image') {
       throw new MediaMigrateError('permanent', 'UNSUPPORTED_CONTENT', `content is not a supported raster image (${sn?.mime ?? 'unknown'})`, { sniffed: sn?.mime ?? null });
     }
-    let meta: sharp.Metadata;
+    let meta: SharpMetadata;
     try {
       meta = await sharp(filePath, { limitInputPixels: limits.maxPixels, failOn: 'error', animated: true }).metadata();
     } catch (e) {
@@ -100,7 +102,7 @@ export class SharpProcessor implements MediaProcessor {
         img = img.png({ effort: spec.effort });
         break;
     }
-    let info: sharp.OutputInfo;
+    let info: SharpOutputInfo;
     try {
       info = await img.toFile(outPath);
     } catch (e) {
@@ -115,7 +117,7 @@ export class SharpProcessor implements MediaProcessor {
   }
 
   async validate(filePath: string, expect: { maxWidth: number; format: string; mime: string }): Promise<ProbeResult> {
-    let meta: sharp.Metadata;
+    let meta: SharpMetadata;
     try {
       meta = await sharp(filePath, { failOn: 'error', animated: true }).metadata();
       await sharp(filePath, { failOn: 'error', animated: true }).stats(); // forces a full decode: catches truncation
