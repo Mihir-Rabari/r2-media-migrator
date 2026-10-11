@@ -11,7 +11,7 @@
       "accessKeyIdEnv": "R2_ACCESS_KEY_ID",
       "secretAccessKeyEnv": "R2_SECRET_ACCESS_KEY"
     },
-    "legacyHosts": ["cdn.v2enterprise.in", "pub-replaceme.r2.dev"],
+    "legacyHosts": ["cdn.v2enterprise.in", "pub-8848428a9a9e4b2bb5d68abcd08009a6.r2.dev"],
     "excludePrefixes": []
   },
 

@@ -40,7 +40,7 @@ and `db.getCollectionNames()` on staging before the first non-dry run.
 | Host | Treatment |
 |---|---|
 | `cdn.v2enterprise.in` | **legacy host** (Cloudflare custom domain on the R2 bucket); also the destination base URL |
-| `pub-<hash>.r2.dev` | **legacy host** — the example contains the placeholder `pub-replaceme.r2.dev`; replace with the exact hostname from the data (152 product URLs per the investigation). Do not use `*.r2.dev` (matches other people's buckets; validation warns) |
+| `pub-<hash>.r2.dev` | **legacy host** — confirmed from the production database on 2026-10-11: `pub-8848428a9a9e4b2bb5d68abcd08009a6.r2.dev` (432 references in the main media fields). Do not use `*.r2.dev` (matches other people's buckets; validation warns) |
 | `ik.imagekit.io`, `images.pexels.com`, `images.unsplash.com`, `v2-fashion.s3.amazonaws.com` | external → counted in the inventory, **never** rewritten (also listed in `safety.neverRewriteHosts`) |
 | `v2enterprise.in` | own app origin (`/v2_logo.webp`, `/videos/*`, `/sliders/*`) → not a bucket → untouched |
 | `youtu.be` | external |
