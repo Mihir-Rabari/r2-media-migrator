@@ -360,7 +360,7 @@ async function journalCommands(p: Parsed, io: Io, out: Out): Promise<number> {
       }
 
       case 'verify': {
-        const rep = await verify(rt.deps);
+        const rep = await verify(rt.deps, { concurrency: p.concurrency ?? 8 });
         out.result({ ...rep }, [`verification: ${rep.ok ? 'PASS' : 'FAIL / INCOMPLETE'}`, `assets checked: ${rep.assetsChecked}   not complete: ${rep.incomplete}   canonical refs checked: ${rep.canonicalReferencesChecked}`, ...rep.violations.slice(0, 50).map((v) => `  VIOLATION ${v}`), ...rep.warnings.slice(0, 20).map((v) => `  warning ${v}`)].join('\n'));
         return rep.exitCode;
       }

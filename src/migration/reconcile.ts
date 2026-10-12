@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import type { EngineDeps } from './context';
 import { ExitCode } from '../domain/errors';
 import { newRunId } from '../domain/ids';
+import { mapLimit } from '../core/limits';
 import { readOnlyDatabase, readOnlyStorage } from '../core/guards';
 import { os_hostname, defaultPidAlive } from './util';
 
@@ -53,7 +54,8 @@ export async function reconcile(deps: EngineDeps, opts: { fix: boolean; deep?: b
 
     const assets = journal.listAssets();
     const known = new Set<string>();
-    for (const a of assets) {
+    // network-bound per-asset checks run with bounded parallelism (issues are sorted afterwards for stable output)
+    await mapLimit(assets, 8, async (a) => {
       // originals must still exist (I9)
       if (!['DISCOVERED', 'SOURCE_MISSING', 'SKIPPED'].includes(a.state)) {
         const h = await deps.source.head(a.sourceKey);
@@ -82,7 +84,8 @@ export async function reconcile(deps: EngineDeps, opts: { fix: boolean; deep?: b
           for (const i of issues) if (i.assetId === a.assetId && i.fixable) i.fixed = true;
         }
       }
-    }
+    });
+    issues.sort((x, y) => (x.type + (x.assetId ?? '') + x.detail < y.type + (y.assetId ?? '') + y.detail ? -1 : 1));
 
     // references
     const refs = journal.listRefs({ statuses: ['PENDING', 'UPDATING', 'UPDATED', 'CONFLICT', 'ROLLBACK_CONFLICT'] });

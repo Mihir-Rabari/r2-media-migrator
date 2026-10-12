@@ -98,3 +98,12 @@ export class RateLimiter {
     if (wait > 0) await this.sleep(wait);
   }
 }
+
+/** Run `fn` over `items` with at most `limit` in flight. Rejects with the first error (remaining workers drain). */
+export async function mapLimit<T>(items: readonly T[], limit: number, fn: (item: T) => Promise<void>): Promise<void> {
+  let next = 0;
+  const workers = Array.from({ length: Math.max(1, Math.min(limit, items.length)) }, async () => {
+    while (next < items.length) await fn(items[next++]);
+  });
+  await Promise.all(workers);
+}

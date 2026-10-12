@@ -331,3 +331,22 @@ test('processor crash: a processor that throws on one asset fails only that asse
     w.cleanup();
   }
 });
+
+test('mapLimit: processes every item, never exceeds the limit, and surfaces the first error', async () => {
+  const { mapLimit } = await import('../../src/core/limits');
+  let active = 0;
+  let max = 0;
+  const seen: number[] = [];
+  await mapLimit(Array.from({ length: 40 }, (_, i) => i), 5, async (i) => {
+    active++;
+    max = Math.max(max, active);
+    await new Promise((r) => setImmediate(r));
+    seen.push(i);
+    active--;
+  });
+  assert.equal(seen.length, 40);
+  assert.equal(new Set(seen).size, 40);
+  assert.ok(max <= 5 && max >= 2, `max in flight ${max}`);
+  await assert.rejects(mapLimit([1, 2, 3], 2, async (x) => { if (x === 2) throw new Error('boom'); }), /boom/);
+  await mapLimit([], 3, async () => { throw new Error('never'); });
+});

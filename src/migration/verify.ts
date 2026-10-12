@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import type { EngineDeps } from './context';
 import { ExitCode } from '../domain/errors';
 import { expandAll } from '../database/paths';
+import { mapLimit } from '../core/limits';
 
 export interface VerifyReport {
   ok: boolean;
@@ -23,7 +24,7 @@ export interface VerifyReport {
  *  - every canonical-looking value in approved DB fields maps to a verified asset (I1) — scanned from the DB, not the journal
  * `ok` is false whenever anything is unproven; incomplete migrations are never "verified".
  */
-export async function verify(deps: EngineDeps, opts: { sample?: number } = {}): Promise<VerifyReport> {
+export async function verify(deps: EngineDeps, opts: { sample?: number; concurrency?: number } = {}): Promise<VerifyReport> {
   const { journal, dest, source, db, cfg, resolver } = deps;
   const violations: string[] = [];
   const warnings: string[] = [];
@@ -31,9 +32,10 @@ export async function verify(deps: EngineDeps, opts: { sample?: number } = {}): 
   let checked = 0;
   const assets = journal.listAssets();
   const target = opts.sample ? assets.slice(0, opts.sample) : assets;
-  for (const a of target) {
-    if (a.state === 'SKIPPED' || a.state === 'ROLLED_BACK') continue;
-    if (a.state !== 'COMPLETE') { incomplete++; warnings.push(`asset ${a.assetId} (${a.sourceKey}) is ${a.state}, not COMPLETE`); continue; }
+  // Per-asset checks are network-bound (HEAD/GET per variant): run a bounded number in parallel.
+  await mapLimit(target, opts.concurrency ?? 8, async (a) => {
+    if (a.state === 'SKIPPED' || a.state === 'ROLLED_BACK') return;
+    if (a.state !== 'COMPLETE') { incomplete++; warnings.push(`asset ${a.assetId} (${a.sourceKey}) is ${a.state}, not COMPLETE`); return; }
     checked++;
     if (!(await source.head(a.sourceKey))) violations.push(`I9: original missing for ${a.assetId} (${a.sourceKey})`);
     const vs = journal.listVariants(a.assetId);
@@ -54,7 +56,9 @@ export async function verify(deps: EngineDeps, opts: { sample?: number } = {}): 
       if (!cur) { violations.push(`${r.collection}/${r.docId} missing`); continue; }
       if (r.status === 'UPDATED' && cur[r.path] !== r.newValue) warnings.push(`drift: ${r.collection}/${r.docId}/${r.path} no longer holds the migrated value`);
     }
-  }
+  });
+  violations.sort();
+  warnings.sort();
 
   // I1 from the database side
   let canonicalChecked = 0;
