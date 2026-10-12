@@ -203,11 +203,14 @@ export async function loadConfig(opts: LoadOptions): Promise<LoadedConfig> {
  * different field map, destination layout or transformation profile.
  */
 export function semanticFingerprint(cfg: MediaMigrateConfig): string {
-  const { processing: pr, migration: mg, ...rest } = cfg;
+  const { processing: pr, migration: mg, safety, ...rest } = cfg;
   const { concurrency: _c, threadsPerJob: _t, tempDir: _d, tempBudgetBytes: _b, ...proc } = pr;
   void _c; void _t; void _d; void _b;
   return fingerprint({
     ...rest, observability: undefined, processing: proc,
+    // allowProductionMutations is an AUTHORISATION switch, not a description of what a run produces: flipping it must not
+    // invalidate dry-run evidence or attestations. Only the never-rewrite list changes behaviour.
+    safety: { neverRewriteHosts: safety.neverRewriteHosts },
     migration: { originals: mg.originals, verification: mg.verification },
     database: { ...rest.database, writePolicy: { referenceUpdates: rest.database.writePolicy.referenceUpdates } },
   });

@@ -123,6 +123,38 @@ test('migration: dry-run guard sits BELOW the engine — even a buggy stage that
   }
 });
 
+test('migration: a dry run AFTER process still samples (staged assets) and confirms destination objects match what would be produced', async () => {
+  const w = makeWorld();
+  try {
+    await seedCatalogue(w, 3);
+    await w.engine().run('process');
+    const snap = w.db.snapshot();
+    const puts = w.storage.mutations;
+    const dry = await w.engine({ dryRun: true }).run('dry-run', { limit: 10 });
+    assert.equal(dry.status, 'DRY_RUN_COMPLETE');
+    const evs = w.journal.events(dry.runId, { limit: 500 }).filter((e) => e.type === 'dryrun.asset');
+    assert.equal(evs.length, 4, 'all 4 staged assets sampled');
+    for (const e of evs) for (const v of e.detail.variants as Array<{ destinationMatches: boolean }>) assert.equal(v.destinationMatches, true);
+    assert.equal(w.db.snapshot(), snap);
+    assert.equal(w.storage.mutations, puts);
+  } finally {
+    w.cleanup();
+  }
+});
+
+test('config: flipping safety.allowProductionMutations does not change the semantic fingerprint', async () => {
+  const { loadConfig } = await import('../../src/config/load');
+  const { testConfig } = await import('../../src/testing/harness');
+  const base = JSON.parse(JSON.stringify(testConfig()));
+  const a = await loadConfig({ rawConfig: base, env: {}, requireSecrets: false });
+  base.safety.allowProductionMutations = true;
+  const b = await loadConfig({ rawConfig: base, env: {}, requireSecrets: false });
+  assert.equal(a.configFingerprint, b.configFingerprint);
+  base.safety.neverRewriteHosts = ['x.example.com'];
+  const c = await loadConfig({ rawConfig: base, env: {}, requireSecrets: false });
+  assert.notEqual(a.configFingerprint, c.configFingerprint);
+});
+
 test('migration: process stages assets (verified, no DB change); migrate then finishes without regenerating', async () => {
   const w = makeWorld();
   try {

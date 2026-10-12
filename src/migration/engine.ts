@@ -794,7 +794,12 @@ export class MigrationEngine {
     const limit = opts.limit ?? 20;
     const dir = path.join(this.d.paths.reportDir, this.runId, 'samples');
     fs.mkdirSync(dir, { recursive: true });
+    // Prefer not-yet-processed assets; top up with already-staged ones so a dry run after `process` still has a sample and can
+    // confirm that the objects in storage are exactly what the current settings would produce.
     const planned = journal.listAssets({ states: ['PLANNED'], limit });
+    if (planned.length < limit) {
+      planned.push(...journal.listAssets({ states: ['ASSETS_WRITTEN', 'DESTINATION_VERIFIED', 'REFERENCES_UPDATED', 'CACHE_HANDLED', 'COMPLETE'], limit: limit - planned.length }));
+    }
     let predictedBytes = 0;
     const sem = new Semaphore(Math.max(1, Math.min(cfg.processing.concurrency, 8)));
     await Promise.all(planned.map((a) => sem.run(async () => {
@@ -816,7 +821,7 @@ export class MigrationEngine {
           const key = this.destKey(a.assetId, p);
           const exists = await dest.head(key);
           predictedBytes += gen.bytes;
-          variants.push({ width: p.width, effectiveWidth: gen.width, bytes: gen.bytes, key, destinationExists: !!exists });
+          variants.push({ width: p.width, effectiveWidth: gen.width, bytes: gen.bytes, key, destinationExists: !!exists, destinationMatches: !!exists && exists.metadata.sha256 === gen.sha256 && exists.size === gen.bytes });
         }
         const refs = journal.listRefs({ assetId: a.assetId });
         journal.appendEvent({
