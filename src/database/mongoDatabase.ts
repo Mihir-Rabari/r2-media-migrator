@@ -91,8 +91,10 @@ export class MongoDatabase implements DatabaseProvider {
 
   async readValues(collection: string, docId: string, paths: readonly string[]): Promise<Record<string, unknown> | null> {
     const coll = (await this.db()).collection(collection);
+    // Project whole TOP-LEVEL fields: real MongoDB cannot project a numeric array index ("photos.0" yields an empty array),
+    // so the element is selected in code afterwards.
     const projection: Record<string, 1> = {};
-    for (const p of paths) projection[p] = 1;
+    for (const r of rootsOf(paths)) projection[r] = 1;
     const doc = await coll.findOne({ _id: decodeId(docId) }, { projection });
     if (!doc) return null;
     return Object.fromEntries(paths.map((p) => [p, getAtPath(doc, p)]));
@@ -110,7 +112,7 @@ export class MongoDatabase implements DatabaseProvider {
       }
       const r = await coll.updateOne(filter, { $set: set }, session ? { session } : undefined);
       if (r.matchedCount === 1) return { ok: true };
-      const cur = await coll.findOne({ _id: decodeId(it.docId) }, { projection: Object.fromEntries(it.ops.map((o) => [o.path, 1])), ...(session ? { session } : {}) });
+      const cur = await coll.findOne({ _id: decodeId(it.docId) }, { projection: Object.fromEntries(rootsOf(it.ops.map((o) => o.path)).map((r) => [r, 1])), ...(session ? { session } : {}) });
       if (!cur) return { ok: false, reason: 'missing' };
       return { ok: false, reason: 'conflict', actual: Object.fromEntries(it.ops.map((o) => [o.path, getAtPath(cur, o.path)])) };
     };

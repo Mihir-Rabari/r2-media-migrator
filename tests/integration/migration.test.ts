@@ -155,6 +155,31 @@ test('config: flipping safety.allowProductionMutations does not change the seman
   assert.notEqual(a.configFingerprint, c.configFingerprint);
 });
 
+test('migration: gallery arrays migrate and roll back through the MongoDB adapter (regression: numeric-index projection returned nothing on real MongoDB)', async () => {
+  const { MongoDatabase } = await import('../../src/database/mongoDatabase');
+  const { FakeMongoClient } = await import('../../src/testing/fakeMongo');
+  const { ObjectId } = await import('mongodb');
+  const { rollback } = await import('../../src/migration/rollback');
+  const w = makeWorld();
+  try {
+    await seedCatalogue(w, 3); // storage only; the documents below live in the (simulated) MongoDB
+    const client = new FakeMongoClient();
+    const ids = [new ObjectId(), new ObjectId()];
+    client.insert('products', { _id: ids[0], photo: w.url('products/p0.jpg'), photos: [w.url('products/p1.jpg'), w.url('products/p2.jpg')], hoverImage: w.url('products/alpha.png') });
+    client.insert('products', { _id: ids[1], photo: w.url('products/p1.jpg'), photos: [w.url('products/p0.jpg'), w.url('products/p2.jpg'), w.url('products/p1.jpg')] });
+    const before = JSON.stringify(client.docs('products'));
+    const db = new MongoDatabase({ database: 'x', client });
+    const res = await w.engine({ db }).run('migrate');
+    assert.equal(res.status, 'COMPLETE', res.message);
+    for (const d of client.docs('products')) for (const u of [d.photo, ...(d.photos ?? [])]) assert.ok(u.startsWith(NEW_BASE), u);
+    const rb = await rollback(w.engine({ db }).d, { dryRun: false, confirmed: true });
+    assert.equal(rb.exitCode, 0);
+    assert.equal(JSON.stringify(client.docs('products')), before, 'exact restoration through the Mongo adapter');
+  } finally {
+    w.cleanup();
+  }
+});
+
 test('migration: process stages assets (verified, no DB change); migrate then finishes without regenerating', async () => {
   const w = makeWorld();
   try {

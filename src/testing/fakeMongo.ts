@@ -31,8 +31,13 @@ function project(doc: any, projection?: Record<string, 1>): any {
   if (!projection) return structuredCloneDoc(doc);
   const out: any = { _id: doc._id };
   for (const k of Object.keys(projection)) {
-    const root = k.split('.')[0];
-    if (doc[root] !== undefined) out[root] = structuredCloneDoc(doc[root]);
+    const segs = k.split('.');
+    const root = segs[0];
+    if (doc[root] === undefined) continue;
+    // Faithful to real MongoDB: a projection through a NUMERIC array index does not return the element
+    // (for arrays of scalars it yields an empty array), so callers must project the whole top-level field.
+    if (segs.length > 1 && segs.some((x) => /^\d+$/.test(x))) out[root] = Array.isArray(doc[root]) ? [] : structuredCloneDoc(doc[root]);
+    else out[root] = structuredCloneDoc(doc[root]);
   }
   return out;
 }
